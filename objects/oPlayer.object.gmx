@@ -26,16 +26,17 @@
           <argument>
             <kind>1</kind>
             <string>// speed
-vx = 0
-vy = 0
-accel = 4
-maxSpeed = 12
+vx = 0;
+vy = 0;
+accel = 3;
+maxSpeed = 12;
+friction = 0.75;
 
 // gravity
-dir = 270
-grav = 10
-gx = 0
-gy = grav
+grav = 10;
+gx = 0;
+gy = grav;
+dir = 270;
 </string>
           </argument>
         </arguments>
@@ -64,7 +65,49 @@ kLeft = keyboard_check(vk_left) || keyboard_check(ord('A'));
 kRight = keyboard_check(vk_right) || keyboard_check(ord('D'));
 kUp = keyboard_check(vk_up) || keyboard_check(ord('W'));
 
+// Accelerate
+if (kLeft) {
+    if (vx &gt; -maxSpeed) vx -= accel;
+    else vx = -maxSpeed;
+}
+else if (kRight) {
+    if (vx &lt; maxSpeed) vx += accel;
+    else vx = maxSpeed;
+}
+else {
+    vx *= friction;
+}
 
+// tryna be jump?
+if (kUp &amp;&amp; OnGround(gx, gy)) {
+    // jump based on negative gravity
+    vx -= sign(gx)*jumpSpeed;
+    vy -= sign(gy)*jumpSpeed;
+}
+
+// Apply Gravity
+vx += gx;
+vy += gy;
+
+// Horizontal Movement
+repeat(abs(vx)) {
+    if (!place_meeting(x + sign(vx), y, oSolid))
+        x += sign(vx);
+    else {
+        vx = 0;
+        break;
+    }
+}
+
+// Vertical Movement
+repeat(abs(vy)) {
+    if (!place_meeting(x, y + sign(vy), oSolid))
+        y += sign(vy);
+    else {
+        vy = 0;
+        break;
+    }
+}
 </string>
           </argument>
         </arguments>

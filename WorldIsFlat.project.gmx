@@ -11,6 +11,9 @@
   </sprites>
   <backgrounds name="background"/>
   <paths name="paths"/>
+  <scripts name="scripts">
+    <script>scripts\OnGround.gml</script>
+  </scripts>
   <objects name="objects">
     <object>objects\oGame</object>
     <object>objects\oSolid</object>
