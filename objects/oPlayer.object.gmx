@@ -28,18 +28,19 @@
             <string>// speed
 vx = 0;
 vy = 0;
+mspeed = 0;
 accelGround = 3;
 accelAir = 2;
 accel = accelGround;
 maxSpeed = 12;
-frict = 0.75;
-jumpSpeed = 20;
+frictGround = 0.7;
+frictAir = 0.92;
+frict = frictGround;
+jumpSpeed = 24;
 
 // gravity
 grav = 2;
-gx = 0;
-gy = grav;
-dir = 270;
+direction = 270;
 </string>
           </argument>
         </arguments>
@@ -67,44 +68,58 @@ dir = 270;
 kLeft = keyboard_check(vk_left) || keyboard_check(ord('A'));
 kRight = keyboard_check(vk_right) || keyboard_check(ord('D'));
 kUp = keyboard_check(vk_up) || keyboard_check(ord('W'));
+kDown = keyboard_check(vk_down) || keyboard_check(ord('S'));
+
+// Accelerate
+if (kLeft) {
+    if (mspeed &gt; -maxSpeed) mspeed -= accel;
+    else mspeed = -maxSpeed;
+}
+else if (kRight) {
+    if (mspeed &lt; maxSpeed) mspeed += accel;
+    else mspeed = maxSpeed;
+}
+else {
+    mspeed *= frict;
+}
+
+if (direction == 270 || direction == 90) {
+    vx = mspeed;
+}
+else {
+    vy = mspeed;
+}
+
+// Move based on speed
+//vx += lengthdir_x(mspeed, direction + 90);
+//vy += lengthdir_y(mspeed, direction + 90);
+
+var gx = lengthdir_x(grav, direction);
+var gy = lengthdir_y(grav, direction);
+
+// Apply Gravity
+vx += gx;
+vy += gy;
 
 if (OnGround(gx, gy)) {
     // tryna be jump?
     if (kUp) {
         // jump based on negative gravity
-        vx -= sign(gx)*jumpSpeed;
-        vy -= sign(gy)*jumpSpeed;
+        vx -= lengthdir_x(jumpSpeed, direction);
+        vy -= lengthdir_y(jumpSpeed, direction);
+        show_debug_message("hello, lendirx: " + string(lengthdir_x(jumpSpeed, direction)));
     }
-    accel = accelGround;
 }
 else {
-    accel = accelAir;
 }
-
-// Accelerate
-if (kLeft) {
-    if (vx &gt; -maxSpeed) vx -= accel;
-    else vx = -maxSpeed;
-}
-else if (kRight) {
-    if (vx &lt; maxSpeed) vx += accel;
-    else vx = maxSpeed;
-}
-else {
-    vx *= frict;
-}
-
-// Apply Gravity
-vx += gx;
-vy += gy;
 
 // Horizontal Movement
 repeat(abs(vx)) {
     if (!place_meeting(x + sign(vx), y, oSolid))
         x += sign(vx);
     else {
-        gx = sign(vx)*grav;
-        gy = 0;
+        if (vx &lt; 0) direction = 180;
+        else direction = 0;
         vx = 0;
         break;
     }
@@ -115,8 +130,8 @@ repeat(abs(vy)) {
     if (!place_meeting(x, y + sign(vy), oSolid))
         y += sign(vy);
     else {
-        gx = 0;
-        gy = sign(vy)*grav;
+        if (vy &lt; 0) direction = 90;
+        else direction = 270;
         vy = 0;
         break;
     }
