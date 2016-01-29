@@ -28,12 +28,15 @@
             <string>// speed
 vx = 0;
 vy = 0;
-accel = 3;
+accelGround = 3;
+accelAir = 2;
+accel = accelGround;
 maxSpeed = 12;
-friction = 0.75;
+frict = 0.75;
+jumpSpeed = 20;
 
 // gravity
-grav = 10;
+grav = 2;
 gx = 0;
 gy = grav;
 dir = 270;
@@ -65,6 +68,19 @@ kLeft = keyboard_check(vk_left) || keyboard_check(ord('A'));
 kRight = keyboard_check(vk_right) || keyboard_check(ord('D'));
 kUp = keyboard_check(vk_up) || keyboard_check(ord('W'));
 
+if (OnGround(gx, gy)) {
+    // tryna be jump?
+    if (kUp) {
+        // jump based on negative gravity
+        vx -= sign(gx)*jumpSpeed;
+        vy -= sign(gy)*jumpSpeed;
+    }
+    accel = accelGround;
+}
+else {
+    accel = accelAir;
+}
+
 // Accelerate
 if (kLeft) {
     if (vx &gt; -maxSpeed) vx -= accel;
@@ -75,14 +91,7 @@ else if (kRight) {
     else vx = maxSpeed;
 }
 else {
-    vx *= friction;
-}
-
-// tryna be jump?
-if (kUp &amp;&amp; OnGround(gx, gy)) {
-    // jump based on negative gravity
-    vx -= sign(gx)*jumpSpeed;
-    vy -= sign(gy)*jumpSpeed;
+    vx *= frict;
 }
 
 // Apply Gravity
@@ -94,6 +103,8 @@ repeat(abs(vx)) {
     if (!place_meeting(x + sign(vx), y, oSolid))
         x += sign(vx);
     else {
+        gx = sign(vx)*grav;
+        gy = 0;
         vx = 0;
         break;
     }
@@ -104,6 +115,8 @@ repeat(abs(vy)) {
     if (!place_meeting(x, y + sign(vy), oSolid))
         y += sign(vy);
     else {
+        gx = 0;
+        gy = sign(vy)*grav;
         vy = 0;
         break;
     }
